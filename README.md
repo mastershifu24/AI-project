@@ -1,66 +1,8 @@
-# Document RAG: Chat & Report Generator
+# AI-project
 
-A **Retrieval-Augmented Generation (RAG)** system that lets you upload PDFs, ask questions over the content, and generate structured long-form reports—all grounded in your documents.
+**Document RAG: Chat & Report Generator** — upload PDFs, ask questions, generate structured reports. All grounded in your documents.
 
-This is a portfolio project: end-to-end pipeline with clear trade-offs and production-relevant choices (chunking, vector search, citation-aware generation).
+- **Live demo:** [Try the app](https://ai-project-gdqpwm7grr4appqibiaprmt.streamlit.app/)
+- **Code & setup:** [doc-rag-portfolio/](doc-rag-portfolio/) (see [doc-rag-portfolio/README.md](doc-rag-portfolio/README.md))
 
-## What it does
-
-1. **Upload PDFs** → Extract text, chunk with overlap, embed, store in a vector DB (Chroma).
-2. **Chat** → Your question is embedded; relevant chunks are retrieved and passed to an LLM for an answer with source grounding.
-3. **Generate report** → You give a topic; the system retrieves broad context and produces a structured Markdown report (table of contents, sections, citations).
-
-## Tech stack
-
-| Component      | Choice           | Why |
-|----------------|------------------|-----|
-| PDF            | pypdf            | Simple, reliable extraction |
-| Chunking       | 800 chars, 150 overlap | Balance retrieval precision vs. context continuity |
-| Embeddings     | OpenAI `text-embedding-3-small` | Quality and consistency |
-| Vector store   | Chroma (local)   | No signup, good for portfolio/demo |
-| LLM            | OpenAI (e.g. `gpt-4o-mini`) | Ease of use; swap for others if needed |
-| UI             | Streamlit        | Fast to build and run |
-
-## Setup
-
-1. **Clone and enter the project**
-   ```bash
-   cd doc-rag-portfolio
-   ```
-
-2. **Create a virtual environment and install dependencies**
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate   # Windows
-   # source .venv/bin/activate  # macOS/Linux
-   pip install -r requirements.txt
-   ```
-
-3. **Configure API key**
-   - Copy `.env.example` to `.env`
-   - Add your OpenAI API key: `OPENAI_API_KEY=sk-...`
-
-4. **Run the app (from project root)**
-   ```bash
-   streamlit run app/main.py
-   ```
-
-5. In the app: upload one or more PDFs → click **Index PDFs** → use **Chat** or **Generate report**.
-
-## Project layout
-
-```
-doc-rag-portfolio/
-  app/
-    main.py          # Streamlit UI
-    pdf_processor.py # PDF text extraction + chunking
-    vector_store.py  # Chroma + OpenAI embeddings
-    rag.py           # Retrieve + format context, Q&A
-    generator.py     # Long-form report generation
-  config.py         # Chunk size, top_k, model, paths
-  data/             # Created at runtime: uploads/, chroma_db/
-  README.md
-  CUSTOMERS_AND_USE_CASES.md
-```
-
-## Design choices (for interviews)
+Tech: Python, Streamlit, ChromaDB, sentence-transformers, OpenAI. MIT License.
