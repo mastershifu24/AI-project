@@ -4,8 +4,13 @@
 # PDF
 pypdf>=3.0.0
 
-# Embeddings + vector store (local, no cloud signup required)
+# Embeddings (free, local — no API key needed for indexing)
+sentence-transformers>=2.2.0
+
+# Vector store (local, no cloud signup required)
 chromadb>=0.4.22
+
+# LLM for chat + report generation (needs API key)
 openai>=1.12.0
 
 # App

@@ -1,5 +1,6 @@
 """
 RAG: retrieve relevant chunks and format context for the LLM.
+Retrieval uses local embeddings (free). Only the final LLM call uses OpenAI.
 """
 from openai import OpenAI
 
@@ -18,12 +19,11 @@ def build_context(chunks: list[tuple[str, dict]], separator: str = "\n\n---\n\n"
 
 def retrieve_and_build_context(
     store: DocVectorStore,
-    openai_client: OpenAI,
     query: str,
     top_k: int = TOP_K,
 ) -> str:
     """Retrieve top_k chunks for query and return formatted context."""
-    chunks = store.query(query, openai_client, top_k=top_k)
+    chunks = store.query(query, top_k=top_k)
     return build_context(chunks)
 
 
@@ -35,9 +35,9 @@ def answer_with_rag(
     system_prompt: str | None = None,
 ) -> str:
     """
-    RAG-based Q&A: retrieve context, then generate answer.
+    RAG-based Q&A: retrieve context (free, local), then generate answer (OpenAI).
     """
-    context = retrieve_and_build_context(store, openai_client, query)
+    context = retrieve_and_build_context(store, query)
     default_system = """You are a helpful assistant. Answer based ONLY on the provided context. If the context does not contain enough information, say so. Do not make up facts."""
     system = system_prompt or default_system
     user = f"""Context from documents:\n\n{context}\n\nQuestion: {query}\n\nAnswer (based only on the context above):"""

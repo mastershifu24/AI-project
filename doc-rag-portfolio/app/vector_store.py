@@ -1,35 +1,43 @@
 """
-Vector store using Chroma (local, no API for embeddings storage).
-Embeddings via OpenAI for quality and consistency with typical production stacks.
+Vector store using Chroma (local) with free local embeddings (sentence-transformers).
+No API key needed for indexing or retrieval — only chat/report generation uses OpenAI.
 """
 from pathlib import Path
 import uuid
 
 import chromadb
 from chromadb.config import Settings
-from openai import OpenAI
+from sentence_transformers import SentenceTransformer
 
-from config import CHROMA_DIR, OPENAI_EMBEDDING_MODEL
+from config import CHROMA_DIR, LOCAL_EMBEDDING_MODEL
 
-
-def get_embedding(client: OpenAI, text: str, model: str = OPENAI_EMBEDDING_MODEL) -> list[float]:
-    """Single text to embedding."""
-    resp = client.embeddings.create(input=[text], model=model)
-    return resp.data[0].embedding
+# Module-level cache so the model loads once
+_model: SentenceTransformer | None = None
 
 
-def get_embeddings_batch(client: OpenAI, texts: list[str], model: str = OPENAI_EMBEDDING_MODEL) -> list[list[float]]:
-    """Batch embed (OpenAI allows batch)."""
+def _get_model() -> SentenceTransformer:
+    global _model
+    if _model is None:
+        _model = SentenceTransformer(LOCAL_EMBEDDING_MODEL)
+    return _model
+
+
+def get_embedding(text: str) -> list[float]:
+    """Single text to embedding (local, free)."""
+    model = _get_model()
+    return model.encode(text).tolist()
+
+
+def get_embeddings_batch(texts: list[str]) -> list[list[float]]:
+    """Batch embed (local, free)."""
     if not texts:
         return []
-    resp = client.embeddings.create(input=texts, model=model)
-    # Preserve order by index
-    by_idx = {d.index: d.embedding for d in resp.data}
-    return [by_idx[i] for i in range(len(texts))]
+    model = _get_model()
+    return model.encode(texts).tolist()
 
 
 class DocVectorStore:
-    """Chroma-backed store for document chunks with OpenAI embeddings."""
+    """Chroma-backed store for document chunks with local embeddings."""
 
     def __init__(self, persist_dir: Path = CHROMA_DIR, collection_name: str = "doc_rag"):
         self.persist_dir = Path(persist_dir)
@@ -40,7 +48,6 @@ class DocVectorStore:
         )
         self.collection_name = collection_name
         self._collection = None
-        self._openai = None
 
     @property
     def collection(self):
@@ -51,11 +58,8 @@ class DocVectorStore:
             )
         return self._collection
 
-    def set_openai_client(self, client: OpenAI):
-        self._openai = client
-
-    def add_chunks(self, chunks: list[tuple[str, dict]], openai_client: OpenAI):
-        """Add chunks with metadata. Embeds via OpenAI."""
+    def add_chunks(self, chunks: list[tuple[str, dict]]):
+        """Add chunks with metadata. Embeds locally (free)."""
         if not chunks:
             return
         texts = [c[0] for c in chunks]
@@ -66,13 +70,13 @@ class DocVectorStore:
                 if not isinstance(v, (str, int, float, bool)):
                     m[k] = str(v)
 
-        embeddings = get_embeddings_batch(openai_client, texts)
+        embeddings = get_embeddings_batch(texts)
         ids = [str(uuid.uuid4()) for _ in chunks]
         self.collection.add(ids=ids, embeddings=embeddings, documents=texts, metadatas=metadatas)
 
-    def query(self, query_text: str, openai_client: OpenAI, top_k: int = 8) -> list[tuple[str, dict]]:
+    def query(self, query_text: str, top_k: int = 8) -> list[tuple[str, dict]]:
         """Return top_k (document, metadata) for query."""
-        q_embedding = get_embedding(openai_client, query_text)
+        q_embedding = get_embedding(query_text)
         results = self.collection.query(
             query_embeddings=[q_embedding],
             n_results=top_k,

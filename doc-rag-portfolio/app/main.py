@@ -48,10 +48,6 @@ def main():
     st.title("Document RAG: Chat & Report Generator")
     st.caption("Upload PDFs, ask questions, or generate a structured report from your documents.")
 
-    openai_client = get_openai()
-    if not openai_client:
-        st.stop()
-
     store = DocVectorStore()
 
     # Sidebar: upload and index
@@ -72,7 +68,7 @@ def main():
                 with st.spinner("Chunking and embedding..."):
                     store.clear()
                     chunks = process_pdfs(paths)
-                    store.add_chunks(chunks, openai_client)
+                    store.add_chunks(chunks)
                 st.success(f"Indexed {len(chunks)} chunks from {len(paths)} PDF(s).")
 
         if st.button("Clear index"):
@@ -85,6 +81,9 @@ def main():
     if mode == "Chat (Q&A)":
         q = st.chat_input("Ask something about your documents...")
         if q:
+            openai_client = get_openai()
+            if not openai_client:
+                st.stop()
             with st.chat_message("user"):
                 st.write(q)
             with st.chat_message("assistant"):
@@ -102,6 +101,9 @@ def main():
             if not topic:
                 st.warning("Enter a topic.")
             else:
+                openai_client = get_openai()
+                if not openai_client:
+                    st.stop()
                 with st.spinner("Retrieving context and generating report (this may take a minute)..."):
                     report = generate_report(
                         store,

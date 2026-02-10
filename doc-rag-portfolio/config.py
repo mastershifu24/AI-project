@@ -22,4 +22,6 @@ MIN_RELEVANCE = 0.0  # Optional: filter by similarity score
 MAX_REPORT_SECTIONS = 8
 TARGET_REPORT_WORDS = 2000  # Portfolio version: 2k words is plenty to show capability
 OPENAI_CHAT_MODEL = os.getenv("OPENAI_CHAT_MODEL", "gpt-4o-mini")
-OPENAI_EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
+
+# Local embedding model (free, no API key needed)
+LOCAL_EMBEDDING_MODEL = "all-MiniLM-L6-v2"

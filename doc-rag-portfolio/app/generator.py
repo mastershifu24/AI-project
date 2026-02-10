@@ -1,17 +1,17 @@
 """
 Long-form report generation from retrieved context.
-Structured sections + citations, scoped for portfolio (2k words).
+Retrieval uses local embeddings (free). Only the LLM call uses OpenAI.
 """
 from openai import OpenAI
 
 from config import TOP_K, TARGET_REPORT_WORDS, MAX_REPORT_SECTIONS, OPENAI_CHAT_MODEL
 from app.vector_store import DocVectorStore
-from app.rag import retrieve_and_build_context, build_context
+from app.rag import build_context
 
 
-def _retrieve_for_report(store: DocVectorStore, openai_client: OpenAI, topic: str) -> str:
+def _retrieve_for_report(store: DocVectorStore, topic: str) -> str:
     """Retrieve more context for report (broader + higher top_k)."""
-    chunks = store.query(topic, openai_client, top_k=min(TOP_K * 2, 20))
+    chunks = store.query(topic, top_k=min(TOP_K * 2, 20))
     return build_context(chunks)
 
 
@@ -26,7 +26,7 @@ def generate_report(
     """
     Generate a structured report (table of contents, sections, citations) from document context.
     """
-    context = _retrieve_for_report(store, openai_client, topic)
+    context = _retrieve_for_report(store, topic)
 
     system = """You are an expert technical writer. You write clear, structured reports based only on the provided document context. You must:
 - Use only information from the context; cite source numbers like [1], [2] when referring to the numbered sources.
