@@ -12,13 +12,8 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 import streamlit as st
+from dotenv import load_dotenv
 from openai import OpenAI
-
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except Exception:
-    pass  # .env not needed on Streamlit Cloud (use app secrets)
 
 from config import (
     CHROMA_DIR,
@@ -30,6 +25,8 @@ from app.pdf_processor import process_pdfs
 from app.vector_store import DocVectorStore
 from app.rag import answer_with_rag
 from app.generator import generate_report
+
+load_dotenv()
 
 
 def ensure_dirs():
