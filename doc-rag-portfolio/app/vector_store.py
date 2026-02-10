@@ -84,5 +84,8 @@ class DocVectorStore:
 
     def clear(self):
         """Remove all documents in the collection (for re-indexing)."""
-        self.client.delete_collection(self.collection_name)
+        try:
+            self.client.delete_collection(self.collection_name)
+        except Exception:
+            pass  # Collection doesn't exist yet — nothing to clear
         self._collection = None
