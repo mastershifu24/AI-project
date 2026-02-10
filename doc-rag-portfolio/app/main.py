@@ -42,8 +42,19 @@ def get_openai():
     return OpenAI(api_key=key)
 
 
+def init_session_state():
+    """Initialize session state for persistent chat and report history."""
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+    if "last_report" not in st.session_state:
+        st.session_state.last_report = None
+    if "last_report_topic" not in st.session_state:
+        st.session_state.last_report_topic = None
+
+
 def main():
     ensure_dirs()
+    init_session_state()
     st.set_page_config(page_title="Doc RAG — Chat & Report", layout="wide")
     st.title("Document RAG: Chat & Report Generator")
     st.caption("Upload PDFs, ask questions, or generate a structured report from your documents.")
@@ -76,23 +87,37 @@ def main():
             # Also remove uploaded files so re-index starts fresh
             for f in UPLOADS_DIR.glob("*.pdf"):
                 f.unlink()
+            # Clear chat and report history too
+            st.session_state.chat_history = []
+            st.session_state.last_report = None
+            st.session_state.last_report_topic = None
             st.info("Index and uploads cleared. Upload new files to start fresh.")
 
     # Main area: mode and content
     mode = st.radio("Mode", ["Chat (Q&A)", "Generate report"], horizontal=True)
 
     if mode == "Chat (Q&A)":
+        # Show full chat history (persists across reruns)
+        for msg in st.session_state.chat_history:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
         q = st.chat_input("Ask something about your documents...")
         if q:
+            # Show user message immediately
+            with st.chat_message("user"):
+                st.write(q)
+            st.session_state.chat_history.append({"role": "user", "content": q})
+
+            # Generate and show answer
             openai_client = get_openai()
             if not openai_client:
                 st.stop()
-            with st.chat_message("user"):
-                st.write(q)
             with st.chat_message("assistant"):
                 with st.spinner("Retrieving and answering..."):
                     answer = answer_with_rag(store, openai_client, q, OPENAI_CHAT_MODEL)
                 st.markdown(answer)
+            st.session_state.chat_history.append({"role": "assistant", "content": answer})
 
     else:
         topic = st.text_input(
@@ -115,13 +140,19 @@ def main():
                         model=OPENAI_CHAT_MODEL,
                         target_words=TARGET_REPORT_WORDS,
                     )
-                st.markdown(report)
-                st.download_button(
-                    "Download as Markdown",
-                    data=report,
-                    file_name="report.md",
-                    mime="text/markdown",
-                )
+                st.session_state.last_report = report
+                st.session_state.last_report_topic = topic
+
+        # Show last report (persists across reruns)
+        if st.session_state.last_report:
+            st.markdown(f"**Report: {st.session_state.last_report_topic}**")
+            st.markdown(st.session_state.last_report)
+            st.download_button(
+                "Download as Markdown",
+                data=st.session_state.last_report,
+                file_name="report.md",
+                mime="text/markdown",
+            )
 
 
 if __name__ == "__main__":
