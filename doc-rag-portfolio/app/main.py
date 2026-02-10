@@ -73,7 +73,10 @@ def main():
 
         if st.button("Clear index"):
             store.clear()
-            st.info("Index cleared. Upload and index again to re-add documents.")
+            # Also remove uploaded files so re-index starts fresh
+            for f in UPLOADS_DIR.glob("*.pdf"):
+                f.unlink()
+            st.info("Index and uploads cleared. Upload new files to start fresh.")
 
     # Main area: mode and content
     mode = st.radio("Mode", ["Chat (Q&A)", "Generate report"], horizontal=True)
