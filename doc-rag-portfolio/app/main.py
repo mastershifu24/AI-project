@@ -37,7 +37,16 @@ def ensure_dirs():
 def get_openai():
     key = os.getenv("OPENAI_API_KEY")
     if not key:
-        st.error("Set OPENAI_API_KEY in .env (see .env.example).")
+        try:
+            key = st.secrets["OPENAI_API_KEY"]
+        except (AttributeError, KeyError, TypeError):
+            pass
+    if not key:
+        st.error(
+            "**Chat and Report need an API key.** "
+            "Running locally? Set `OPENAI_API_KEY` in `.env` (see `.env.example`). "
+            "Using the live demo? The app owner must set the key in Streamlit Cloud → App settings → Secrets."
+        )
         return None
     return OpenAI(api_key=key)
 
@@ -126,22 +135,27 @@ def main():
             key="report_topic",
         )
         if st.button("Generate report"):
-            if not topic:
+            if not topic or not topic.strip():
                 st.warning("Enter a topic.")
+            elif not store.has_documents():
+                st.warning("Upload PDFs and click **Index PDFs** in the sidebar first. The report needs indexed documents.")
             else:
                 openai_client = get_openai()
                 if not openai_client:
                     st.stop()
-                with st.spinner("Retrieving context and generating report (this may take a minute)..."):
-                    report = generate_report(
-                        store,
-                        openai_client,
-                        topic,
-                        model=OPENAI_CHAT_MODEL,
-                        target_words=TARGET_REPORT_WORDS,
-                    )
-                st.session_state.last_report = report
-                st.session_state.last_report_topic = topic
+                try:
+                    with st.spinner("Retrieving context and generating report (this may take a minute)..."):
+                        report = generate_report(
+                            store,
+                            openai_client,
+                            topic.strip(),
+                            model=OPENAI_CHAT_MODEL,
+                            target_words=TARGET_REPORT_WORDS,
+                        )
+                    st.session_state.last_report = report
+                    st.session_state.last_report_topic = topic.strip()
+                except Exception as e:
+                    st.error(f"Report generation failed: {e}. Check that your API key is set and has quota (Streamlit Cloud: App settings → Secrets).")
 
         # Show last report (persists across reruns)
         if st.session_state.last_report:

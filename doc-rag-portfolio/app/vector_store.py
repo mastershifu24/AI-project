@@ -86,6 +86,13 @@ class DocVectorStore:
         metas = results["metadatas"][0] if results["metadatas"] else []
         return list(zip(docs, metas))
 
+    def has_documents(self) -> bool:
+        """True if the collection exists and has at least one document."""
+        try:
+            return self.collection.count() > 0
+        except Exception:
+            return False
+
     def clear(self):
         """Remove all documents in the collection (for re-indexing)."""
         try:
