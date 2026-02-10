@@ -1,0 +1,7 @@
+.venv/
+venv/
+.env
+data/
+*.pyc
+__pycache__/
+.Streamlit/
