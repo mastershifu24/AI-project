@@ -1,7 +1,7 @@
 .venv/
 venv/
 .env
-ragvenv
+ragvenv/
 data/
 *.pyc
 __pycache__/
