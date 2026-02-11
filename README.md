@@ -2,7 +2,7 @@
 
 **Document RAG: Chat & Report Generator** — upload PDFs, ask questions, generate structured reports. All grounded in your documents.
 
-- **Live demo:** [Try the app](https://ai-project-gdqpwm7grr4appqibiaprmt.streamlit.app/)
+- **Live demo:** [Try the app](https://ai-project-ahmed-shifa.streamlit.app//)
 - **Code & setup:** [doc-rag-portfolio/](doc-rag-portfolio/) (see [doc-rag-portfolio/README.md](doc-rag-portfolio/README.md))
 
 Tech: Python, Streamlit, ChromaDB, sentence-transformers, OpenAI. MIT License.
