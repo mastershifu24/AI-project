@@ -2,7 +2,7 @@
 
 A **Retrieval-Augmented Generation (RAG)** system that lets you upload PDFs, ask questions over the content, and generate structured long-form reports—all grounded in your documents.
 
-**Live demo:** [Try it on Streamlit Cloud](https://ai-project-gdqpwm7grr4appqibiaprmt.streamlit.app/)  
+**Live demo:** [Try it on Streamlit Cloud](https://ai-project-ahmed-shifa.streamlit.app//)  
 **Code:** [GitHub](https://github.com/mastershifu24/AI-project)
 
 This is a portfolio project: end-to-end pipeline with clear trade-offs and production-relevant choices (chunking, vector search, citation-aware generation).
