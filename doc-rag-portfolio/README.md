@@ -2,7 +2,7 @@
 
 A **Retrieval-Augmented Generation (RAG)** system that lets you upload PDFs, ask questions over the content, and generate structured long-form reports—all grounded in your documents.
 
-**Live demo:** [DocParse AI on Streamlit](https://ai-project-ahmed-shifa.streamlit.app/)  
+**Live demo:** [DocParse AI](https://doc-parse.streamlit.app/)  
 **Code:** [GitHub](https://github.com/mastershifu24/AI-project)
 
 Built as a startup-style project: end-to-end pipeline with clear trade-offs and production-relevant choices (chunking, vector search, citation-aware generation).
