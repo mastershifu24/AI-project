@@ -64,8 +64,8 @@ def init_session_state():
 def main():
     ensure_dirs()
     init_session_state()
-    st.set_page_config(page_title="Doc RAG — Chat & Report", layout="wide")
-    st.title("Document RAG: Chat & Report Generator")
+    st.set_page_config(page_title="DocParse AI — Chat & Report", layout="wide")
+    st.title("DocParse AI")
     st.caption("Upload PDFs, ask questions, or generate a structured report from your documents.")
 
     store = DocVectorStore()
